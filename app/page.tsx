@@ -1,10 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ---------------- PHOTO EXPLOSION ---------------- */
 const PhotoExplosion = ({ isVisible }: { isVisible: boolean }) => {
-  // 1. List your 8 specific paths here
   const myPhotos = [
     "assets/phuto1.jpg",
     "assets/phuto2.jpg",
@@ -21,9 +20,8 @@ const PhotoExplosion = ({ isVisible }: { isVisible: boolean }) => {
       {isVisible && (
         <div className="fixed inset-0 pointer-events-none z-[110] flex items-center justify-center">
           {myPhotos.map((src, i) => {
-            // Adjust math for 8 items instead of 9
             const angle = (i / myPhotos.length) * Math.PI * 2; 
-            const distance = 400 + Math.random() * 200; 
+            const distance = 380 + Math.random() * 200; 
             const xDest = Math.cos(angle) * distance;
             const yDest = Math.sin(angle) * distance;
 
@@ -35,12 +33,11 @@ const PhotoExplosion = ({ isVisible }: { isVisible: boolean }) => {
                   scale: 1,
                   x: [xDest, xDest + 10, xDest],
                   y: [yDest, yDest - 10, yDest],
-                  // Added a bit of random tilt to the final position
                   rotate: [0, 10, -10, (Math.random() - 0.5) * 20],
                 }}
                 transition={{
                   duration: 0.8,
-                  delay: 0.5 + i * 0.08, // Staggered entry
+                  delay: 0.5 + i * 0.08,
                   rotate: { repeat: Infinity, duration: 6, ease: "easeInOut" }
                 }}
                 className="absolute w-40 h-40 md:w-64 md:h-64 p-2 bg-white shadow-2xl border border-rose-100 rounded-sm"
@@ -83,6 +80,19 @@ export default function ValentineFinal() {
   const [status, setStatus] = useState<"idle" | "asking" | "accepted">("idle");
   const [isUnfurled, setIsUnfurled] = useState(false);
   const [noButtonPos, setNoButtonPos] = useState({ x: 0, y: 0 });
+  
+  // 1. Audio Reference
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 2. Control audio playback based on status
+  useEffect(() => {
+    if (status === "accepted" && audioRef.current) {
+      audioRef.current.play().catch(err => console.log("Playback blocked:", err));
+    } else if (status === "idle" && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [status]);
 
   const handleNoHover = () => {
     setNoButtonPos({
@@ -98,6 +108,9 @@ export default function ValentineFinal() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[radial-gradient(circle,_#ffffff_0%,_#fff0f3_100%)]">
+      {/* 3. Hidden Audio Element (Looping) */}
+      <audio ref={audioRef} src="assets/song.mp3" loop />
+
       <BackgroundDecor />
 
       {/* 1. MINI-GAME OVERLAY */}
@@ -172,7 +185,7 @@ export default function ValentineFinal() {
 
                   <div className="p-8 text-center">
                     <button 
-                      onClick={() => alert("Forever Yours! ❤️")}
+                      onClick={() => alert("I love you too! hehe ❤️")}
                       className="bg-[#be123c] text-white px-12 py-4 rounded-full text-xl font-bold shadow-xl hover:bg-[#9f1239] transition active:scale-95"
                     >
                       I LOVE YOU!
@@ -206,35 +219,33 @@ export default function ValentineFinal() {
             transformStyle: "preserve-3d",
           }}
         >
-          {/* Front Side (The triangle you see when closed) */}
+          {/* Front Side */}
           <div 
             className="absolute inset-0 bg-white" 
             style={{ 
               backfaceVisibility: "hidden", 
-              clipPath: "polygon(0 0, 100% 0, 50% 100%)", // Points DOWN
+              clipPath: "polygon(0 0, 100% 0, 50% 100%)",
               boxShadow: "inset 0 -10px 20px rgba(0,0,0,0.05)"
             }} 
           />
 
-          {/* Back Side (The triangle you see when opened) */}
+          {/* Back Side */}
           <div 
             className="absolute inset-0 bg-[#f1949a]" 
             style={{ 
               backfaceVisibility: "hidden", 
               transform: "rotateX(180deg)", 
-              /* FIXED: We change the polygon so the tip points UP before the 180-flip, 
-                which makes it point DOWN after the flip. */
               clipPath: "polygon(0 100%, 100% 100%, 50% 0)" 
             }} 
           />
         </motion.div>
 
-          {/* Envelope Body Overlay (Front Pocket) */}
+          {/* Envelope Body Overlay */}
           <div className="absolute inset-0 z-30 pointer-events-none">
             <div className="absolute inset-0 bg-white" style={{ clipPath: "polygon(0 0, 0 100%, 100% 100%, 100% 0, 50% 65%)" }} />
           </div>
 
-          {/* Envelope Background (Inside Back) */}
+          {/* Envelope Background */}
           <div className="absolute inset-0 z-10 bg-[#f4a7ae] rounded-b-xl shadow-xl" />
 
           {/* Wax Seal */}
