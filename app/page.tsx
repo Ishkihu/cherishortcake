@@ -12,7 +12,18 @@ const MEMORY_ARCHIVES = [
     path: "/memories/valentines",
     tomeVolume: "Vol. I",
     color: "hover:bg-[#1a2c4c]/80 border-[#b08d57]/40 text-[#b08d57]", 
+    isNew: false,
   },
+  {
+    id: "anniversary",
+    title: "The Anniversary Archive",
+    description: "Unlocking a milestone forged within the timeless chronologies.",
+    date: "Awaiting Date, MMXXVI",
+    path: "/memories/anniversary",
+    tomeVolume: "Vol. II",
+    color: "hover:bg-[#1e3a5f]/80 border-[#d4af37]/60 text-[#d4af37]",
+    isNew: true,
+  }
 ];
 
 interface TrailPoint {
@@ -27,13 +38,18 @@ interface LumosFlash {
   id: number;
 }
 
+const getRomanNumeral = (index: number) => {
+  const numerals = ["I", "II", "III", "IV", "V", "VI"];
+  return numerals[index] || (index + 1).toString();
+};
+
 export default function RavenclawVault() {
+  const [hasEntered, setHasEntered] = useState(false); // Controls the hero page overlay status
   const [trail, setTrail] = useState<TrailPoint[]>([]);
   const [flashes, setFlashes] = useState<LumosFlash[]>([]);
   const [isMouseDown, setIsMouseDown] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Clean up old drawn trail points periodically
   useEffect(() => {
     const interval = setInterval(() => {
       setTrail((prev) => prev.slice(1));
@@ -50,10 +66,8 @@ export default function RavenclawVault() {
     const y = e.clientY - bounds.top;
     const newId = Date.now();
 
-    // Trigger Reverted Lumos Flash
     setFlashes((prev) => [...prev, { x, y, id: newId }]);
 
-    // Instantly remove flash from DOM once animation wraps up
     setTimeout(() => {
       setFlashes((prev) => prev.filter((f) => f.id !== newId));
     }, 600);
@@ -73,7 +87,6 @@ export default function RavenclawVault() {
 
     setTrail((prev) => [...prev, { x, y, id: Math.random() }]);
     
-    // Limit total active path size to avoid dragging lag
     if (trail.length > 40) {
       setTrail((prev) => prev.slice(1));
     }
@@ -105,9 +118,97 @@ export default function RavenclawVault() {
         }
       `}</style>
       
+      {/* ---------------- ANCIENT CINEMATIC HERO ENTRANCE GATE ---------------- */}
+      <AnimatePresence>
+        {!hasEntered && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0,
+              y: -100, // Slides upward like a secret corridor gate rising
+              transition: { duration: 1, ease: [0.76, 0, 0.24, 1] }
+            }}
+            className="absolute inset-0 z-[100] flex flex-col justify-center items-center bg-[#030710] px-4 overflow-hidden"
+          >
+            {/* Background Atmosphere Layer inside Hero gate */}
+            <div 
+              className="absolute inset-0 w-full h-full bg-cover bg-center opacity-10 filter mix-blend-color-dodge grayscale"
+              style={{ backgroundImage: `url('/assets/hogwarts.jpeg')` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#030710]/80 to-[#030710]" />
+
+            {/* Glowing Rune Ambient Accents */}
+            <div className="absolute w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+
+            {/* Hero Main Content Block */}
+            <div className="relative text-center max-w-2xl space-y-8 z-10">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.2 }}
+                className="mx-auto w-24 h-24 mb-2 drop-shadow-[0_0_20px_rgba(176,141,87,0.3)]"
+              >
+                <img 
+                  src="/assets/ravenclaw-logo.png" 
+                  alt="Hogwarts House Crest Entrance" 
+                  className="w-full h-full object-contain filter brightness-90 opacity-80"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 1 }}
+                className="space-y-4"
+              >
+                <span className="text-[10px] tracking-[0.5em] text-[#b08d57] uppercase font-bold block">
+                  Hogwarts Archives Division
+                </span>
+                <h1 className="text-3xl sm:text-5xl md:text-6xl magic-title text-[#d4af37] tracking-widest font-bold filter drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+                  The Forbidden Vault
+                </h1>
+              </motion.div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                transition={{ delay: 0.7, duration: 1 }}
+                className="text-xs sm:text-sm text-slate-400 italic max-w-md mx-auto leading-relaxed tracking-wider font-light"
+              >
+                "An interactive sanctuary compiled under high clearance parameters, safeguarding designated collection records."
+              </motion.p>
+
+              {/* CAST SPELL GATEWAY ACTION BUTTON */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.8 }}
+                className="pt-6"
+              >
+                <button
+                  onClick={() => setHasEntered(true)}
+                  className="group relative px-8 py-3.5 rounded-md border border-[#d4af37]/50 bg-[#091224]/80 text-[#d4af37] text-xs font-bold uppercase tracking-[0.3em] overflow-hidden transition-all duration-500 shadow-[0_0_30px_rgba(212,175,55,0.05)] hover:border-[#d4af37] hover:shadow-[0_0_40px_rgba(212,175,55,0.25)] hover:text-white"
+                >
+                  {/* Internal ambient button lighting flare effect */}
+                  <div className="absolute top-0 -left-[100%] w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-all duration-1000 group-hover:left-[100%]" />
+                  
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    Cast Alohomora <span>✨</span>
+                  </span>
+                </button>
+              </motion.div>
+            </div>
+
+            {/* Base micro-script footer tag */}
+            <div className="absolute bottom-6 text-[8px] uppercase tracking-[0.4em] text-slate-600 font-medium">
+              Awaiting Incantation Sign-off
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ---------------- EASTER EGG: SPELL CASTING LAYERS ---------------- */}
       <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
-        {/* Lumos Click Flashes (Reduced Radius & Faster Fading) */}
         <AnimatePresence>
           {flashes.map((flash) => (
             <motion.div
@@ -131,7 +232,6 @@ export default function RavenclawVault() {
           ))}
         </AnimatePresence>
 
-        {/* Dynamic Continuous Drawing Wand Line */}
         <svg className="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none">
           <filter id="wand-glow">
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -181,7 +281,7 @@ export default function RavenclawVault() {
         />
       </div>
 
-      {/* ---------------- THE EXPANSIVE 12-COLUMN SCREEN GRID ---------------- */}
+      {/* ---------------- THE MAIN EXPANSIVE DASHBOARD WORKSPACE ---------------- */}
       <div className="relative z-40 w-full max-w-[95rem] mx-auto grid grid-cols-1 lg:grid-cols-12 items-center gap-2 xl:gap-4">
         
         {/* ================= FAR LEFT: FULL-SIZED CREST ================= */}
@@ -212,7 +312,7 @@ export default function RavenclawVault() {
             <div className="w-full h-8 border-t border-[#b08d57]/30 bg-gradient-to-t from-black to-transparent" />
           </div>
 
-          {/* BROAD PANEL */}
+          {/* BROAD PANEL CONTAINER */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.99 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -233,27 +333,52 @@ export default function RavenclawVault() {
               </div>
             </header>
 
+            {/* List Renderer Container */}
             <div className="p-6 md:p-8 space-y-5 bg-[#050912]/50">
-              {MEMORY_ARCHIVES.map((archive) => (
+              {MEMORY_ARCHIVES.map((archive, index) => (
                 <div key={archive.id} className="group relative">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-[#b08d57]/0 via-[#b08d57]/15 to-[#b08d57]/0 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
+                    archive.isNew 
+                      ? 'from-[#d4af37]/25 via-[#b08d57]/15 to-[#d4af37]/5' 
+                      : 'from-[#b08d57]/0 via-[#b08d57]/15 to-[#b08d57]/0'
+                  } rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-500`} />
                   
                   <Link href={archive.path} className="block relative z-10">
-                    <div className={`flex items-center p-5 rounded-lg border bg-[#0b1426]/95 border-[#b08d57]/20 backdrop-blur-md transition-all duration-300 shadow-xl ${archive.color}`}>
+                    <div className={`flex items-center p-5 rounded-lg border backdrop-blur-md transition-all duration-300 shadow-xl ${
+                      archive.isNew 
+                        ? "bg-[#0c1a30]/95 border-[#d4af37]/60 shadow-[0_0_20px_rgba(212,175,55,0.08)]" 
+                        : `bg-[#0b1426]/95 border-[#b08d57]/20 ${archive.color}`
+                    }`}>
                       
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg border border-[#b08d57]/40 bg-gradient-to-br from-[#1c355e] to-[#040811] flex items-center justify-center text-lg text-[#d4af37] font-bold shadow-inner">
-                        I
+                      <div className={`flex-shrink-0 w-12 h-12 rounded-lg border flex items-center justify-center text-lg font-bold shadow-inner transition-all duration-300 ${
+                        archive.isNew 
+                          ? "border-[#d4af37] bg-gradient-to-br from-[#1b345c] to-[#040812] text-[#fff] drop-shadow-[0_0_6px_rgba(212,175,55,0.35)]" 
+                          : "border-[#b08d57]/40 bg-gradient-to-br from-[#1c355e] to-[#040811] text-[#d4af37]"
+                      }`}>
+                        {getRomanNumeral(index)}
                       </div>
 
                       <div className="flex-grow ml-5 border-l border-[#b08d57]/20 pl-5 grid grid-cols-12 items-center gap-4">
                         <div className="col-span-12 md:col-span-8 min-w-0">
                           <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-                            <h2 className="text-base md:text-xl font-bold text-slate-200 tracking-wide group-hover:text-[#d4af37] transition-colors truncate">
+                            <h2 className={`text-base md:text-xl font-bold tracking-wide transition-colors truncate ${
+                              archive.isNew ? "text-white group-hover:text-[#d4af37]" : "text-slate-200 group-hover:text-[#d4af37]"
+                            }`}>
                               {archive.title}
                             </h2>
                             <span className="italic text-[10px] text-[#b08d57] shrink-0 border border-[#b08d57]/20 px-2.5 py-0.5 rounded-full bg-[#050a14] font-medium tracking-wide">
                               {archive.tomeVolume}
                             </span>
+
+                            {archive.isNew && (
+                              <motion.span 
+                                animate={{ opacity: [0.6, 1, 0.6] }}
+                                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                                className="text-[9px] font-sans font-bold tracking-[0.15em] uppercase text-[#02050a] bg-[#d4af37] px-2 py-0.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] shrink-0"
+                              >
+                                New
+                              </motion.span>
+                            )}
                           </div>
                           <p className="text-xs md:text-sm text-[#829bb8] mt-1.5 font-light tracking-wide truncate">
                             {archive.description}
@@ -264,7 +389,9 @@ export default function RavenclawVault() {
                           <span className="text-xs tracking-wider hidden sm:block opacity-70 font-sans font-medium text-[#64748b] whitespace-nowrap">
                             {archive.date}
                           </span>
-                          <span className="text-2xl text-[#b08d57] transform group-hover:translate-x-2 transition-transform duration-300 shrink-0 select-none">
+                          <span className={`text-2xl transform group-hover:translate-x-2 transition-transform duration-300 shrink-0 select-none ${
+                            archive.isNew ? "text-[#d4af37]" : "text-[#b08d57]"
+                          }`}>
                             ⟶
                           </span>
                         </div>
@@ -274,20 +401,6 @@ export default function RavenclawVault() {
                   </Link>
                 </div>
               ))}
-
-              <div className="flex items-center p-5 rounded-lg border border-gray-800/40 bg-[#060b14]/40 opacity-35 select-none">
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg border border-gray-700/30 bg-[#0a1122] flex items-center justify-center text-base text-gray-500">
-                  II
-                </div>
-                <div className="flex-grow ml-5 border-l border-gray-800/30 pl-5">
-                  <h2 className="text-sm tracking-widest text-gray-400 uppercase font-bold">
-                    Sealed Record
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1 font-light italic">
-                    Awaiting active timeline manifestation...
-                  </p>
-                </div>
-              </div>
             </div>
 
             <footer className="bg-[#050a14] border-t border-[#b08d57]/20 p-4 text-center flex justify-between px-6 text-[9px] uppercase tracking-[0.25em] text-[#576880] pointer-events-none">
